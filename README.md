@@ -48,27 +48,27 @@ This project uses [Hammerspoon](https://www.hammerspoon.org/) to automate UI int
   ```bash
   brew install hammerspoon
   ```
-	•	Accessibility permissions for Hammerspoon:
-    System Settings → Privacy & Security → Accessibility → Enable Hammerspoon
+- Accessibility permissions for Hammerspoon:
+  System Settings → Privacy & Security → Accessibility → Enable Hammerspoon
 
 ## Installation
 
-1.	Clone this repo (or copy files into `~/.hammerspoon/`):
-```bash
-git clone https://github.com/your-org/outlook-text-display-size.git
-cd outlook-text-display-size
-cp outlook-font.lua ~/.hammerspoon/outlook-font.lua
-cp init.lua           ~/.hammerspoon/init.lua
-```
+1. Clone this repo (or copy files into `~/.hammerspoon/`):
+   ```bash
+   git clone https://github.com/your-org/outlook-text-display-size.git
+   cd outlook-text-display-size
+   cp outlook-font.lua ~/.hammerspoon/outlook-font.lua
+   cp init.lua           ~/.hammerspoon/init.lua
+   ```
 
-2.	(Optional) Create or edit JSON config:
+2. (Optional) Create or edit JSON config:
 ```bash
 cp outlook-font.json ~/.hammerspoon/outlook-font.json
 ```
 
-3.	Reload Hammerspoon:
-   •	Press Ctrl+Alt+Cmd+R
-	 •	Or click the menubar icon → Reload Config
+3. Reload Hammerspoon:
+- Press Ctrl+Alt+Cmd+R
+- Or click the menubar icon → Reload Config
  
 
 ## Configuration
@@ -106,27 +106,27 @@ All defaults are defined in outlook-font.lua. You may override any key by editin
 ```
 
 ## Usage
-	•	Hotkeys:
-	   •	Ctrl+Alt+Cmd+G → Increase text size
-	   •	Ctrl+Alt+Cmd+K → Decrease text size
-	   •	Ctrl+Alt+Cmd+T → Toggle (cycles between increase/decrease)
-	•	Menubar:
-     Click the 🔤 icon, then choose:
-	   •	Standard Text Size
-	   •	Larger Text Size
-	   •	Toggle Text Size
-	   •	Reload Hammerspoon Config
+- Hotkeys:
+  - Ctrl+Alt+Cmd+G → Increase text size
+  - Ctrl+Alt+Cmd+K → Decrease text size
+  - Ctrl+Alt+Cmd+T → Toggle (cycles between increase/decrease)
+- Menubar:
+  Click the 🔤 icon, then choose:
+  - Standard Text Size
+  - Larger Text Size
+  - Toggle Text Size
+  - Reload Hammerspoon Config
 Each action will show a brief notification and a canvas overlay in the center of your screen.
 
 ## Troubleshooting
-	•	No hotkeys?
-	   •	Ensure Hammerspoon is running and has Accessibility permission.
-	   •	Check for binding conflicts in other apps.
-	•	Menu icon missing?
-	   •	Verify your `init.lua` is loaded without errors (Hammerspoon console).
-	•	Slider/buttons not working?
-	   •	Use macOS Accessibility Inspector to confirm UI roles and labels.
-	•	Adjust delays in JSON if Outlook is slow.
-	   •	JSON overrides not applied?
-	   •	Ensure `~/.hammerspoon/outlook-font.json` is well-formed JSON.
-	   •	Restart or reload Hammerspoon after editing.
+- No hotkeys?
+  - Ensure Hammerspoon is running and has Accessibility permission.
+  - Check for binding conflicts in other apps.
+- Menu icon missing?
+- Verify your `init.lua` is loaded without errors (Hammerspoon console).
+  - Slider/buttons not working?
+  - Use macOS Accessibility Inspector to confirm UI roles and labels.
+  - Adjust delays in JSON if Outlook is slow.
+- JSON overrides not applied?
+  - Ensure `~/.hammerspoon/outlook-font.json` is well-formed JSON.
+  - Restart or reload Hammerspoon after editing.
