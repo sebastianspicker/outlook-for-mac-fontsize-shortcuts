@@ -15,31 +15,36 @@ local of = require("outlook-font")
 -- 3) Notification helper
 --------------------------------------------------------------------------------
 local function notify(text)
-    hs.notify.new({
-        title           = "Outlook Font",
-        informativeText = text,
-        autoWithdraw    = true,
-        withdrawAfter   = 2
-    }):send()
+    hs.notify
+        .new({
+            title = "Outlook Font",
+            informativeText = text,
+            autoWithdraw = true,
+            withdrawAfter = 2,
+        })
+        :send()
 end
 
 --------------------------------------------------------------------------------
 -- 4) Bind hotkeys with notifications
 --------------------------------------------------------------------------------
-hs.hotkey.bind({"ctrl","alt","cmd"}, "G", function()
-    of.adjustTextSize(true)
-    notify("Text size increased")
+hs.hotkey.bind({ "ctrl", "alt", "cmd" }, "G", function()
+    if of.adjustTextSize(true) then
+        notify("Text size increased")
+    end
 end)
 
-hs.hotkey.bind({"ctrl","alt","cmd"}, "K", function()
-    of.adjustTextSize(false)
-    notify("Text size decreased")
+hs.hotkey.bind({ "ctrl", "alt", "cmd" }, "K", function()
+    if of.adjustTextSize(false) then
+        notify("Text size decreased")
+    end
 end)
 
-hs.hotkey.bind({"ctrl","alt","cmd"}, "T", function()
-    of.toggleTextSize()
-    local state = of.toggleState and "Text size increased" or "Text size decreased"
-    notify("Toggle: " .. state)
+hs.hotkey.bind({ "ctrl", "alt", "cmd" }, "T", function()
+    if of.toggleTextSize() then
+        local state = of.toggleState and "Text size increased" or "Text size decreased"
+        notify("Toggle: " .. state)
+    end
 end)
 
 --------------------------------------------------------------------------------
@@ -48,40 +53,45 @@ end)
 local menuItems = {
     {
         title = "Smaller Text Size",
-        fn    = function()
-            of.adjustTextSize(false)
-            notify("Text size decreased")
-        end
+        fn = function()
+            if of.adjustTextSize(false) then
+                notify("Text size decreased")
+            end
+        end,
     },
     {
         title = "Larger Text Size",
-        fn    = function()
-            of.adjustTextSize(true)
-            notify("Text size increased")
-        end
+        fn = function()
+            if of.adjustTextSize(true) then
+                notify("Text size increased")
+            end
+        end,
     },
     {
         title = "Toggle Text Size",
-        fn    = function()
-            of.toggleTextSize()
-            local state = of.toggleState and "Text size increased" or "Text size decreased"
-            notify("Toggle: " .. state)
-        end
+        fn = function()
+            if of.toggleTextSize() then
+                local state = of.toggleState and "Text size increased" or "Text size decreased"
+                notify("Toggle: " .. state)
+            end
+        end,
     },
     { title = "-" },
     {
         title = "Reload Hammerspoon Config",
-        fn    = function() hs.reload() end
-    }
+        fn = function()
+            hs.reload()
+        end,
+    },
 }
 --------------------------------------------------------------------------------
 -- 6) Create a global menubar so it isn’t garbage-collected
 --------------------------------------------------------------------------------
-menu = hs.menubar.new()
+local menu = hs.menubar.new()
 if menu then
     menu:setTitle("🔤")
     menu:setTooltip("Outlook Text Size")
     menu:setMenu(menuItems)
 else
-    notify("Error", "Could not create menubar item")
+    notify("Could not create menubar item")
 end

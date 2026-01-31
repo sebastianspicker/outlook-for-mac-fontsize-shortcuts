@@ -33,6 +33,7 @@
   // Supports multiple languages for matching the UI text
   "labelTexts": [
     "Text display size",
+    "Größe der Textanzeige",
     "Taille d'affichage du texte",
     "Tamaño de visualización de texto"
   ],

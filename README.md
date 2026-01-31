@@ -55,13 +55,15 @@ This project uses [Hammerspoon](https://www.hammerspoon.org/) to automate UI int
 
 1. Clone this repo (or copy files into `~/.hammerspoon/`):
    ```bash
-   git clone https://github.com/your-org/outlook-text-display-size.git
-   cd outlook-text-display-size
+   git clone <repo-url>
+   cd outlook-for-mac-fontsize-shortcuts
+
    cp outlook-font.lua ~/.hammerspoon/outlook-font.lua
-   cp init.lua           ~/.hammerspoon/init.lua
+   cp -R outlook_font  ~/.hammerspoon/outlook_font
+   cp init.lua         ~/.hammerspoon/init.lua
    ```
 
-2. (Optional) Create or edit JSON config:
+2. (Optional) Create or edit JSON config (JSONC-style `//` and `/* */` comments are allowed):
 ```bash
 cp outlook-font.json ~/.hammerspoon/outlook-font.json
 ```
@@ -73,9 +75,9 @@ cp outlook-font.json ~/.hammerspoon/outlook-font.json
 
 ## Configuration
 
-All defaults are defined in outlook-font.lua. You may override any key by editing `~/.hammerspoon/outlook-font.json`. Example:
+All defaults are defined in `outlook-font.lua`. You may override any key by editing `~/.hammerspoon/outlook-font.json`. Example:
 
-```json
+```jsonc
 {
   // Application names
   "appNames": ["Outlook", "Microsoft Outlook"],
@@ -112,7 +114,7 @@ All defaults are defined in outlook-font.lua. You may override any key by editin
   - Ctrl+Alt+Cmd+T → Toggle (cycles between increase/decrease)
 - Menubar:
   Click the 🔤 icon, then choose:
-  - Standard Text Size
+  - Smaller Text Size
   - Larger Text Size
   - Toggle Text Size
   - Reload Hammerspoon Config
@@ -128,5 +130,22 @@ Each action will show a brief notification and a canvas overlay in the center of
   - Use macOS Accessibility Inspector to confirm UI roles and labels.
   - Adjust delays in JSON if Outlook is slow.
 - JSON overrides not applied?
-  - Ensure `~/.hammerspoon/outlook-font.json` is well-formed JSON.
+  - Ensure `~/.hammerspoon/outlook-font.json` is valid JSON (or JSONC with comments).
   - Restart or reload Hammerspoon after editing.
+
+## Development
+
+Tooling:
+
+```bash
+brew install lua luarocks stylua
+make tools
+```
+
+Quality gates:
+
+```bash
+make fmt
+make lint
+make test
+```
