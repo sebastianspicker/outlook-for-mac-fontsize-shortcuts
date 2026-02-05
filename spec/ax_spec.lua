@@ -67,4 +67,13 @@ describe("outlook_font.ax", function()
         assert.equals(button1, buttons[1])
         assert.equals(button2, buttons[2])
     end)
+
+    it("finds ancestor by role", function()
+        local button = node({ AXRole = "AXButton" })
+        local label = node({ AXRole = "AXStaticText", AXValue = "General" })
+        label._attrs.AXParent = button
+
+        local found = ax.find_ancestor_by_role(label, "AXButton")
+        assert.equals(button, found)
+    end)
 end)

@@ -1,4 +1,32 @@
+# Lua / LuaRocks
 .luarocks/
 lua_modules/
-.DS_Store
+*.rock
+*.src.rock
 
+# Tests / coverage
+coverage/
+luacov.*
+
+# Tooling caches
+.luacheckcache
+.cache/
+.tmp/
+*.tmp
+*.log
+
+# OS / editors
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*~
+
+# docs (local findings/logs/decisions)
+DECISIONS.md
+FINDINGS.md
+LOG.md
+REFACTOR_PLAN.md
+PHYSICS_AUDIT.md
+validation.md

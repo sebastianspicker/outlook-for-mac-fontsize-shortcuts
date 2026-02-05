@@ -42,6 +42,17 @@ function M.find_static_text(root, substring)
     return nil
 end
 
+function M.find_ancestor_by_role(node, role)
+    local current = node
+    while current do
+        if current:attributeValue("AXRole") == role then
+            return current
+        end
+        current = current:attributeValue("AXParent")
+    end
+    return nil
+end
+
 function M.find_button_group_near_labels(root, label_texts)
     for _, label in ipairs(label_texts or {}) do
         local elem = M.find_static_text(root, label)

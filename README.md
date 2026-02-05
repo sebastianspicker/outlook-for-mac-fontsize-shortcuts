@@ -71,6 +71,11 @@ cp outlook-font.json ~/.hammerspoon/outlook-font.json
 3. Reload Hammerspoon:
 - Press Ctrl+Alt+Cmd+R
 - Or click the menubar icon → Reload Config
+
+## Quickstart
+1. Copy `init.lua`, `outlook-font.lua`, and `outlook_font/` into `~/.hammerspoon/`.
+2. Reload Hammerspoon.
+3. Use the hotkeys or the menubar dropdown to change text size.
  
 
 ## Configuration
@@ -132,6 +137,15 @@ Each action will show a brief notification and a canvas overlay in the center of
 - JSON overrides not applied?
   - Ensure `~/.hammerspoon/outlook-font.json` is valid JSON (or JSONC with comments).
   - Restart or reload Hammerspoon after editing.
+
+## Security
+- This project automates UI interactions only and does not access message content.
+- If you discover a security issue, open a GitHub issue with minimal repro steps and avoid including secrets or personal data.
+
+## Testing
+```bash
+make test
+```
 
 ## Development
 

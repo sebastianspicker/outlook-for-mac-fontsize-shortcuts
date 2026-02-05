@@ -5,11 +5,14 @@ BUSTED := $(LUAROCKS_TREE)/bin/busted
 
 .PHONY: tools lint fmt fmt-check test clean
 
+TOOLS_LUACHECK_VERSION ?= 1.2.0-1
+TOOLS_BUSTED_VERSION ?= 2.3.0-1
+
 tools:
 	@command -v luarocks >/dev/null || (echo "Missing 'luarocks' (try: brew install luarocks)" && exit 1)
 	@mkdir -p $(LUAROCKS_TREE)
-	@luarocks --tree $(LUAROCKS_TREE) install luacheck
-	@luarocks --tree $(LUAROCKS_TREE) install busted
+	@luarocks --tree $(LUAROCKS_TREE) install luacheck $(TOOLS_LUACHECK_VERSION)
+	@luarocks --tree $(LUAROCKS_TREE) install busted $(TOOLS_BUSTED_VERSION)
 
 lint: $(LUACHECK)
 	@$(LUACHECK) .
@@ -28,4 +31,3 @@ test: $(BUSTED)
 clean:
 	@echo "Removing $(LUAROCKS_TREE)"
 	@luarocks --tree $(LUAROCKS_TREE) purge --old-versions || true
-

@@ -38,6 +38,12 @@ local defaultCfg = {
         "Paramètres personnels",
         "Configuración personal",
     },
+    generalLabels = {
+        "General",
+        "Allgemein",
+        "Général",
+        "General",
+    },
     labelTexts = {
         "Text display size",
         "Größe der Textanzeige",
@@ -109,6 +115,84 @@ local function notify(title, message)
     end
 end
 
+--------------------------------------------------------------------------------
+-- 2.5) Config validation (defensive against invalid override types)
+--------------------------------------------------------------------------------
+local function is_string_array(value)
+    if type(value) ~= "table" then
+        return false
+    end
+    for k, v in pairs(value) do
+        if type(k) ~= "number" or type(v) ~= "string" then
+            return false
+        end
+    end
+    return true
+end
+
+local function sanitize_config(ext)
+    if type(ext) ~= "table" then
+        return util.deep_copy(defaultCfg)
+    end
+
+    local merged = util.deep_merge(util.deep_copy(defaultCfg), ext)
+    local warnings = {}
+
+    local function warn(key, expected)
+        table.insert(warnings, key .. " (" .. expected .. ")")
+    end
+
+    local function reset_top(key)
+        merged[key] = util.deep_copy(defaultCfg[key])
+    end
+
+    local function ensure_string_array(key)
+        if merged[key] ~= nil and not is_string_array(merged[key]) then
+            warn(key, "string[]")
+            reset_top(key)
+        end
+    end
+
+    local function ensure_table_with_fields(key, fields)
+        if merged[key] == nil then
+            return
+        end
+        if type(merged[key]) ~= "table" then
+            warn(key, "table")
+            reset_top(key)
+            return
+        end
+        for subkey, expected in pairs(fields) do
+            local value = merged[key][subkey]
+            if value ~= nil and type(value) ~= expected then
+                warn(key .. "." .. subkey, expected)
+                merged[key][subkey] = defaultCfg[key][subkey]
+            end
+        end
+    end
+
+    ensure_string_array("appNames")
+    ensure_string_array("settingsMenu")
+    ensure_string_array("preferencesMenu")
+    ensure_string_array("headerLabels")
+    ensure_string_array("generalLabels")
+    ensure_string_array("labelTexts")
+
+    ensure_table_with_fields("overlayText", { larger = "string", smaller = "string" })
+    ensure_table_with_fields("delays", { activate = "number", waitInterval = "number", timeout = "number" })
+    ensure_table_with_fields("retry", { attempts = "number", interval = "number" })
+
+    if #warnings > 0 then
+        notify("Config Warning", "Invalid config keys reset to defaults: " .. table.concat(warnings, ", "))
+    end
+
+    return merged
+end
+
+function M._sanitizeConfig(ext)
+    return sanitize_config(ext)
+end
+
 local function showOverlay(text)
     local deps = get_deps()
     if not (deps.canvas and deps.screen and deps.timer) then
@@ -149,6 +233,13 @@ end
 -- 3) Config loading (supports JSONC comments)
 --------------------------------------------------------------------------------
 local config_loaded = false
+
+function M._resetForTest()
+    M.cfg = util.deep_copy(defaultCfg)
+    M.toggleState = false
+    M._deps = nil
+    config_loaded = false
+end
 
 local function decode_json(raw)
     local hs_json = safe_require("hs.json")
@@ -191,7 +282,9 @@ local function ensure_config_loaded()
 
     local ext, decode_err = decode_json(util.strip_jsonc(raw))
     if type(ext) == "table" then
-        M.cfg = util.deep_merge(util.deep_copy(defaultCfg), ext)
+        M.cfg = sanitize_config(ext)
+    elseif ext ~= nil then
+        notify("Config Error", string.format("Expected object in %s", cfgPath))
     elseif decode_err then
         notify("Config Error", string.format("Failed to parse %s (%s)", cfgPath, decode_err))
     end
@@ -401,11 +494,35 @@ function M.adjustTextSize(isPlus)
                         break
                     end
                 end
+                local function press(elem)
+                    if not elem then
+                        return false
+                    end
+                    local ok = pcall(function()
+                        elem:performAction("AXPress")
+                    end)
+                    return ok == true
+                end
+
                 local general = header_idx and header_idx > 1 and siblings[header_idx - 1] or nil
-                if not general then
+                local pressed = press(general)
+
+                if not pressed then
+                    for _, label in ipairs(M.cfg.generalLabels) do
+                        local label_node = ax.find_static_text(win, label)
+                        if label_node then
+                            local btn = ax.find_ancestor_by_role(label_node, "AXButton") or label_node
+                            if press(btn) then
+                                pressed = true
+                                break
+                            end
+                        end
+                    end
+                end
+
+                if not pressed then
                     error("General tile not found")
                 end
-                general:performAction("AXPress")
 
                 if not wait_for_any_label(win) then
                     error("Text display size label not found")
