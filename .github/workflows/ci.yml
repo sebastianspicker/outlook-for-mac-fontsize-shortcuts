@@ -22,7 +22,7 @@ jobs:
           luaVersion: "5.4"
 
       - name: Set up LuaRocks
-        uses: leafo/gh-actions-luarocks@e65774a6386cb4f24e293dca7fc4ff89165b64c5
+        uses: leafo/gh-actions-luarocks@97053c556d6ce2c8e26eb7ac93743437c7af7248
 
       - name: Set up StyLua
         uses: JohnnyMorganz/stylua-action@479972f01e665acfcba96ada452c36608bdbbb5e
