@@ -7,6 +7,11 @@ lua_modules/
 # Tests / coverage
 coverage/
 luacov.*
+test-results/
+junit.xml
+reports/
+semgrep.sarif
+gitleaks-report.json
 
 # Tooling caches
 .luacheckcache

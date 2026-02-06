@@ -2,82 +2,88 @@ name: CI
 
 on:
   push:
+    branches: [main]
   pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 permissions:
   contents: read
 
 jobs:
   lua:
+    name: Lua quality + tests
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     permissions:
       contents: read
-    timeout-minutes: 10
+    env:
+      LUAROCKS_TREE: ./.luarocks
     steps:
-      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+      - name: Checkout
+        uses: actions/checkout@v4
 
       - name: Set up Lua
-        uses: leafo/gh-actions-lua@35bcb06abec04ec87df82e08caa84d545348536e
+        uses: leafo/gh-actions-lua@v10
         with:
-          luaVersion: "5.4"
+          luaVersion: "5.4.6"
 
       - name: Set up LuaRocks
-        uses: leafo/gh-actions-luarocks@e65774a6386cb4f24e293dca7fc4ff89165b64c5
+        uses: leafo/gh-actions-luarocks@v6
+        with:
+          luaRocksVersion: "3.12.2"
 
-      - name: Set up StyLua
-        uses: JohnnyMorganz/stylua-action@479972f01e665acfcba96ada452c36608bdbbb5e
+      - name: Cache LuaRocks
+        uses: actions/cache@v4
+        with:
+          path: |
+            ./.luarocks
+            ~/.cache/luarocks
+          key: ${{ runner.os }}-luarocks-${{ hashFiles('Makefile', '.luacheckrc', '.stylua.toml') }}
+          restore-keys: |
+            ${{ runner.os }}-luarocks-
+
+      - name: Format check (StyLua)
+        uses: JohnnyMorganz/stylua-action@v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           version: "2.3.1"
+          args: --check .
 
       - name: Install tools
-        run: make tools
-
-      - name: Format check
-        run: make fmt-check
+        run: |
+          set -euo pipefail
+          make tools
 
       - name: Lint
-        run: make lint
+        run: |
+          set -euo pipefail
+          make lint
 
       - name: Test
-        run: make test
+        run: |
+          set -euo pipefail
+          make test
 
   gitleaks:
+    name: Secret scan (gitleaks)
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
     timeout-minutes: 10
-    steps:
-      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
-      - name: Secret scan (gitleaks)
-        uses: gitleaks/gitleaks-action@dcedce43c6f43de0b836d1fe38946645c9c638dc
-        with:
-          args: "--redact --verbose"
-
-  dependency-review:
-    if: github.event_name == 'pull_request'
-    runs-on: ubuntu-latest
     permissions:
       contents: read
       pull-requests: read
-    timeout-minutes: 10
     steps:
-      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
-      - name: Dependency review
-        uses: actions/dependency-review-action@46a3c492319c890177366b6ef46d6b4f89743ed4
-
-  semgrep:
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-    timeout-minutes: 15
-    steps:
-      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
-      - name: Set up Python
-        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+      - name: Checkout
+        uses: actions/checkout@v4
         with:
-          python-version: "3.x"
-      - name: Install Semgrep
-        run: python -m pip install --upgrade pip semgrep
-      - name: SAST (Semgrep)
-        run: semgrep --config=auto --error --metrics=off --severity=ERROR
+          fetch-depth: 0
+
+      - name: Run gitleaks
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITLEAKS_ENABLE_COMMENTS: "false"

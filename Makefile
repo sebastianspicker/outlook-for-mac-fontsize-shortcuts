@@ -3,7 +3,7 @@ LUAROCKS_TREE ?= ./.luarocks
 LUACHECK := $(LUAROCKS_TREE)/bin/luacheck
 BUSTED := $(LUAROCKS_TREE)/bin/busted
 
-.PHONY: tools lint fmt fmt-check test clean
+.PHONY: tools lint fmt fmt-check test clean ci
 
 TOOLS_LUACHECK_VERSION ?= 1.2.0-1
 TOOLS_BUSTED_VERSION ?= 2.3.0-1
@@ -27,6 +27,8 @@ fmt-check:
 
 test: $(BUSTED)
 	@$(BUSTED)
+
+ci: fmt-check lint test
 
 clean:
 	@echo "Removing $(LUAROCKS_TREE)"
