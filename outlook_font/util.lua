@@ -14,15 +14,23 @@ local function is_array(t)
     return count == #t
 end
 
-function M.deep_copy(value)
+local function deep_copy_impl(value, visited)
     if type(value) ~= "table" then
         return value
     end
+    if visited[value] then
+        return visited[value]
+    end
     local out = {}
+    visited[value] = out
     for k, v in pairs(value) do
-        out[M.deep_copy(k)] = M.deep_copy(v)
+        out[deep_copy_impl(k, visited)] = deep_copy_impl(v, visited)
     end
     return out
+end
+
+function M.deep_copy(value)
+    return deep_copy_impl(value, {})
 end
 
 function M.deep_merge(dst, src)

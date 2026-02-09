@@ -25,6 +25,7 @@ gitleaks-report.json
 Thumbs.db
 .idea/
 .vscode/
+.cursor/
 *.swp
 *~
 

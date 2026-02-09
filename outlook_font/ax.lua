@@ -75,4 +75,24 @@ function M.find_button_group_near_labels(root, label_texts)
     return nil
 end
 
+-- Returns the button for "larger" or "smaller" by matching AXTitle/AXValue to labels; nil if ambiguous.
+function M.button_by_size_label(buttons, larger_text, smaller_text, want_larger)
+    if not buttons or #buttons < 2 or not larger_text or not smaller_text then
+        return nil
+    end
+    local larger_btn, smaller_btn
+    for _, btn in ipairs(buttons) do
+        local title = (btn:attributeValue("AXTitle") or btn:attributeValue("AXValue") or ""):gsub("^%s*(.-)%s*$", "%1")
+        if string.find(title, larger_text, 1, true) then
+            larger_btn = btn
+        elseif string.find(title, smaller_text, 1, true) then
+            smaller_btn = btn
+        end
+    end
+    if want_larger then
+        return larger_btn
+    end
+    return smaller_btn
+end
+
 return M

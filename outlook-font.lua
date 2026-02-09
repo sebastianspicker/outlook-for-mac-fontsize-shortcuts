@@ -122,8 +122,13 @@ local function is_string_array(value)
     if type(value) ~= "table" then
         return false
     end
-    for k, v in pairs(value) do
-        if type(k) ~= "number" or type(v) ~= "string" then
+    for i = 1, #value do
+        if type(value[i]) ~= "string" then
+            return false
+        end
+    end
+    for k in pairs(value) do
+        if type(k) ~= "number" or k < 1 or k > #value then
             return false
         end
     end
@@ -352,13 +357,14 @@ local function get_windows(axApp)
     return axApp:attributeValue("AXWindows") or {}
 end
 
-local function find_new_window(axApp, prev_windows)
+-- Uses a single snapshot (current_windows) to avoid race; prev/current keyed by object identity.
+local function find_new_window_from_lists(prev_windows, current_windows)
     local prev = {}
     for _, w in ipairs(prev_windows or {}) do
-        prev[tostring(w)] = true
+        prev[w] = true
     end
-    for _, w in ipairs(get_windows(axApp)) do
-        if not prev[tostring(w)] then
+    for _, w in ipairs(current_windows or {}) do
+        if not prev[w] then
             return w
         end
     end
@@ -451,7 +457,8 @@ function M.adjustTextSize(isPlus)
 
             local win
             wait_until(function()
-                win = find_new_window(axApp, before) or get_windows(axApp)[#get_windows(axApp)]
+                local current = get_windows(axApp)
+                win = find_new_window_from_lists(before, current) or (current[#current])
                 return win ~= nil
             end)
 
@@ -472,7 +479,9 @@ function M.adjustTextSize(isPlus)
                     error("Slider value range not available")
                 end
                 local newv = isPlus and math.min(val + 1, maxv) or math.max(val - 1, minv)
-                slider:setAttributeValue("AXValue", newv)
+                if not slider:setAttributeValue("AXValue", newv) then
+                    error("Failed to set slider value")
+                end
             else
                 local header
                 for _, hl in ipairs(M.cfg.headerLabels) do
@@ -498,10 +507,10 @@ function M.adjustTextSize(isPlus)
                     if not elem then
                         return false
                     end
-                    local ok = pcall(function()
-                        elem:performAction("AXPress")
+                    local ok, result = pcall(function()
+                        return elem:performAction("AXPress")
                     end)
-                    return ok == true
+                    return ok and result == true
                 end
 
                 local general = header_idx and header_idx > 1 and siblings[header_idx - 1] or nil
@@ -532,8 +541,14 @@ function M.adjustTextSize(isPlus)
                 if not buttons then
                     error("±-Buttons not found")
                 end
-                local btn = isPlus and buttons[#buttons] or buttons[1]
-                btn:performAction("AXPress")
+                local larger_text, smaller_text = M.cfg.overlayText.larger, M.cfg.overlayText.smaller
+                local btn = ax.button_by_size_label(buttons, larger_text, smaller_text, isPlus)
+                if not btn then
+                    btn = isPlus and buttons[#buttons] or buttons[1]
+                end
+                if not btn:performAction("AXPress") then
+                    error("Failed to press size button")
+                end
             end
 
             deps.eventtap.keyStroke({ "cmd" }, "w")
