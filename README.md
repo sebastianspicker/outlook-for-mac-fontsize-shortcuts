@@ -3,6 +3,8 @@
 A Hammerspoon-based tool to quickly adjust the “Text display size” in both **New Outlook** and **Legacy Outlook** for Mac.  
 Provides global hotkeys, a menubar dropdown, notifications & canvas overlays, external JSON configuration, i18n, accessibility checks, retry logic, and toggle-cycle state.
 
+> **Notice:** This repository is provided **as is** and is **no longer maintained**. It may stop working with future Outlook for Mac updates, as it relies on UI automation (accessibility APIs) that can change when Microsoft updates the application. Use at your own discretion.
+
 ## Problem Statement
 
 - **Outlook for Mac (Legacy)** only offers a coarse slider under **Outlook → Preferences… → Fonts** with three positions (Standard, Large, Larger).  

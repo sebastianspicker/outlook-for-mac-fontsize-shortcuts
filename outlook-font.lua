@@ -204,7 +204,11 @@ local function showOverlay(text)
         return
     end
 
-    local screen = deps.screen.mainScreen():fullFrame()
+    local main = deps.screen.mainScreen()
+    if not main then
+        return
+    end
+    local screen = main:fullFrame()
     local width, height = math.min(300, screen.w * 0.5), 60
     local x = screen.x + (screen.w - width) / 2
     local y = screen.y + (screen.h - height) / 2
@@ -230,7 +234,9 @@ local function showOverlay(text)
     }
     c:show()
     deps.timer.doAfter(1.2, function()
-        c:delete()
+        pcall(function()
+            c:delete()
+        end)
     end)
 end
 
@@ -371,6 +377,22 @@ local function find_new_window_from_lists(prev_windows, current_windows)
     return nil
 end
 
+-- True if window looks like Settings/Preferences (has slider or personal-settings header).
+local function is_likely_settings_window(win)
+    if not win then
+        return false
+    end
+    if ax.find_first_by_role(win, "AXSlider") then
+        return true
+    end
+    for _, hl in ipairs(M.cfg.headerLabels) do
+        if ax.find_static_text(win, hl) then
+            return true
+        end
+    end
+    return false
+end
+
 local function wait_until(predicate)
     local deps = get_deps()
     local timer = deps.timer
@@ -458,7 +480,10 @@ function M.adjustTextSize(isPlus)
             local win
             wait_until(function()
                 local current = get_windows(axApp)
-                win = find_new_window_from_lists(before, current) or (current[#current])
+                win = find_new_window_from_lists(before, current)
+                if win and not is_likely_settings_window(win) then
+                    win = nil
+                end
                 return win ~= nil
             end)
 
@@ -596,6 +621,18 @@ function M.bindHotkeys(mapping)
         return
     end
 
+    if type(mapping) ~= "table" then
+        notify("Config Error", "bindHotkeys: mapping must be a table.")
+        return
+    end
+    local function has_binding(b)
+        return type(b) == "table" and type(b.mods) == "table" and b.key ~= nil
+    end
+    if not has_binding(mapping.increase) or not has_binding(mapping.decrease) then
+        notify("Config Error", "bindHotkeys: mapping.increase and mapping.decrease must have .mods (table) and .key.")
+        return
+    end
+
     deps.hotkey.bind(mapping.increase.mods, mapping.increase.key, function()
         M.adjustTextSize(true)
     end)
@@ -603,9 +640,11 @@ function M.bindHotkeys(mapping)
         M.adjustTextSize(false)
     end)
     if mapping.toggle then
-        deps.hotkey.bind(mapping.toggle.mods, mapping.toggle.key, function()
-            M.toggleTextSize()
-        end)
+        if has_binding(mapping.toggle) then
+            deps.hotkey.bind(mapping.toggle.mods, mapping.toggle.key, function()
+                M.toggleTextSize()
+            end)
+        end
     end
 end
 
