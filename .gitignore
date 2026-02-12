@@ -26,11 +26,10 @@ Thumbs.db
 .idea/
 .vscode/
 .cursor/
-.codex/
 *.swp
 *~
 
-# docs (local findings/logs/decisions)
+# Local process docs (optional, not tracked)
 DECISIONS.md
 FINDINGS.md
 LOG.md

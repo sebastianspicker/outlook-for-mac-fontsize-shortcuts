@@ -144,10 +144,18 @@ Each action will show a brief notification and a canvas overlay in the center of
 - This project automates UI interactions only and does not access message content.
 - If you discover a security issue, open a GitHub issue with minimal repro steps and avoid including secrets or personal data.
 
-## Testing
-```bash
-make test
-```
+## Validation (build / run / test)
+
+| Action | Command |
+|--------|---------|
+| Install dev tools (Lua, LuaRocks, Stylua) | `brew install lua luarocks stylua` then `make tools` |
+| Format check | `make fmt-check` |
+| Lint | `make lint` |
+| Tests | `make test` |
+| Full CI (format + lint + test) | `make ci` |
+| Format code | `make fmt` |
+
+Run: copy `init.lua`, `outlook-font.lua`, and `outlook_font/` into `~/.hammerspoon/`, reload Hammerspoon, then use hotkeys or menubar.
 
 ## Development
 
